@@ -13,6 +13,7 @@ PORT = 27993
 pflag = False
 argno = 0
 for arg in sys.argv:
+    #keep track of if last argument was -p
     if arg == '-p':
         pflag = True
     elif pflag:
@@ -25,26 +26,30 @@ for arg in sys.argv:
             ID_NO = arg
         argno += 1
 
-print(PORT)
-print(HOST)
-print(ID_NO)
 
 #set up socket s
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#connect to servver
+#connect to server
 s.connect((HOST, PORT))
 s.sendall(b'cs3700fall2020 HELLO ' + ID_NO.encode('utf-8') + b'\n')
 response = s.recv(8192).decode('utf-8')
-print(response)
 #do as many FINDs as requested
 while (response.split()[1] == 'FIND'):
+    #make sure the response is formatted correctly
+    if (len(response.split()) != 4):
+        raise Exception("Unexpected number of arguments")
     ch = response.split()[2]
     search = response.split()[3]
     numoccurences = search.count(ch)
     message = 'cs3700fall2020 COUNT ' + str(numoccurences) + '\n'
     s.sendall(message.encode('utf-8'))
     response = s.recv(8192).decode('utf-8')
-print("LOOP ENDED")
-print(response)
+
+#make sure the first non-FIND message is a BYE message
+if response.split()[1] == 'BYE':
+    print(response.split()[2])
+else:
+    raise Exception("Unexpected message type after find messages.")
+    
 #close connection
 s.close()    
