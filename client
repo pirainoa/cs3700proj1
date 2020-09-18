@@ -29,6 +29,8 @@ for arg in sys.argv:
 if not (1 <= PORT <= 65535):
     raise Exception("Invalid port")
 
+
+
 #set up socket s
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #connect to server
@@ -37,18 +39,21 @@ s.sendall(b'cs3700fall2020 HELLO ' + ID_NO.encode('utf-8') + b'\n')
 response = s.recv(8192).decode('utf-8')
 
 if (len(response.split()) < 3):
-    raise Exception("Unexpected Number of Arguments")
+    raise Exception("Unexpected number of arguments in response")
 #do as many FINDs as requested
 while (response.split()[1] == 'FIND'):
     #make sure the response is formatted correctly
     if (len(response.split()) != 4):
-        raise Exception("Unexpected number of arguments")
+        raise Exception("Unexpected number of arguments in response")
     ch = response.split()[2]
     search = response.split()[3]
     numoccurences = search.count(ch)
     message = 'cs3700fall2020 COUNT ' + str(numoccurences) + '\n'
     s.sendall(message.encode('utf-8'))
     response = s.recv(8192).decode('utf-8')
+    #check the response is formatted correctly before continuing to loop
+    if (len(response.split()) < 3):
+        raise Exception("Unexpected number of arguments in response")
 
 #make sure the first non-FIND message is a BYE message
 if response.split()[1] == 'BYE':
