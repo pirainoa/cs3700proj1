@@ -26,6 +26,8 @@ for arg in sys.argv:
             ID_NO = arg
         argno += 1
 
+if not (1 <= PORT <= 65535):
+    raise Exception("Invalid port")
 
 #set up socket s
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,6 +35,9 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((HOST, PORT))
 s.sendall(b'cs3700fall2020 HELLO ' + ID_NO.encode('utf-8') + b'\n')
 response = s.recv(8192).decode('utf-8')
+
+if (len(response.split()) < 3):
+    raise Exception("Unexpected Number of Arguments")
 #do as many FINDs as requested
 while (response.split()[1] == 'FIND'):
     #make sure the response is formatted correctly
